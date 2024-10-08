@@ -1,5 +1,5 @@
-import Constants from '../config/Constants';
-import Api from '../config/api';
+import Constants from './Constants';
+import Api from './api';
 
 export {
     Constants,

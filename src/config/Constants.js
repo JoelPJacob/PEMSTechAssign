@@ -16,8 +16,9 @@ class Constants {
 
   // Colors
   transparentColor = 'transparent';
-  black = 'FFFF';
-  white = '0000'
+  black = '#000000';
+  white = '#FFFFFF'
+  blue="blue"
 
 }
 
