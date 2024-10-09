@@ -7,15 +7,22 @@ const TabComponent = ({ tabs }) => {
 
   return (
     <View>
-      {/* Tab Selector */}
       <View style={styles.tabContainer}>
         {tabs.map((tab) => (
           <TouchableOpacity
-            key={tab.id} 
-            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+            key={tab.id}
+            style={[
+              styles.tab,
+              activeTab === tab.key ? styles.activeTab : styles.inactiveTab
+            ]}
             onPress={() => setActiveTab(tab.key)}
           >
-            <Text style={styles.tabText}>{tab.title}</Text>
+            <Text style={[
+              styles.tabText,
+              activeTab === tab.key ? styles.activeTabText : styles.inactiveTabText
+            ]}>
+              {tab.title}
+            </Text>
           </TouchableOpacity>
         ))}
       </View>
@@ -33,18 +40,25 @@ const styles = StyleSheet.create({
     marginTop: 10,
   },
   tab: {
-    padding: 10,
-    flex: 1,
-    alignItems: 'center',
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    paddingVertical: 10,
+    paddingHorizontal: 20,
+    borderRadius: 20,
+    marginHorizontal: 5,
   },
   activeTab: {
-    borderBottomColor: Constants.blue,
+    backgroundColor: Constants.blue,
+  },
+  inactiveTab: {
+    backgroundColor: '#E0E0E0',
   },
   tabText: {
-    color: Constants.black,
     fontWeight: '600',
+  },
+  activeTabText: {
+    color: Constants.white,
+  },
+  inactiveTabText: {
+    color: Constants.black,
   },
   tabContent: {
     marginTop: 10,

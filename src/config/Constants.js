@@ -18,7 +18,8 @@ class Constants {
   transparentColor = 'transparent';
   black = '#000000';
   white = '#FFFFFF'
-  blue="blue"
+  blue = "#4169E1"
+  buttonColor = "#1F51FF"
 
 }
 
