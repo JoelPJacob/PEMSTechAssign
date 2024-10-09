@@ -55,7 +55,8 @@ The objective of this assignment is to create a simple mobile app using **React 
 
     -   Navigate to the project directory and install the required dependencies:
 
-    `cd pems-digital-frontend
+    `cd PEMSTechAssign
+    
     npm install`
 
 3.  **Run the Project:**
