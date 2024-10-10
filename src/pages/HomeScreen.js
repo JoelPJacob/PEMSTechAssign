@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, FlatList, RefreshControl, TextInput, StyleSheet } from 'react-native';
+import { View, Text, FlatList, TextInput, StyleSheet } from 'react-native';
 import { getUsers } from '../config/api';
 import { UserCard, Loader } from '../components';
 import { Constants } from '../config';
@@ -8,55 +8,65 @@ import { Search } from '../assets/svg';
 const HomeScreen = ({ navigation }) => {
   const [users, setUsers] = useState([]);
   const [filteredUsers, setFilteredUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [error, setError] = useState('');
-  const [refreshing, setRefreshing] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [hasMoreUsers, setHasMoreUsers] = useState(true);
+  const [allLoaded, setAllLoaded] = useState(false);
 
   useEffect(() => {
     fetchUsers();
   }, [page]);
 
   useEffect(() => {
-    if (searchQuery) {
-      setFilteredUsers(users.filter(user =>
-        user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        user.email.toLowerCase().includes(searchQuery.toLowerCase())
-      ));
-    } else {
-      setFilteredUsers([]);
-    }
+    handleSearch();
   }, [searchQuery, users]);
 
-  const clearSearchQuery = () => {
-    setSearchQuery('');
-  };
-
-  const fetchUsers = async () => {
-    if (!hasMoreUsers) return;
-
-    setLoading(true);
+  const loopUsers = async () => {
     try {
+      setLoading(true);
       const userData = await getUsers();
-      const newUsers = userData.slice((page - 1) * 5, page * 5);
-
-      setUsers(prevUsers => [...prevUsers, ...newUsers]);
-      setHasMoreUsers(newUsers.length === 5); // If fewer than 5 users, no more data
+      setUsers(prevUsers => [...prevUsers, ...userData]);
+      setError('');
     } catch (error) {
       setError(error.message);
     } finally {
       setLoading(false);
-      setRefreshing(false);
+    }
+  };
+
+  const fetchUsers = async () => {
+    try {
+      setLoading(true);
+      const userData = await getUsers();
+      setUsers(prevUsers => [...prevUsers, ...userData.slice((page - 1) * 5, page * 5)]);
+      setError('');
+      if (page * 5 >= userData.length) {
+        setAllLoaded(true);
+      }
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   const loadMoreUsers = () => {
-    if (hasMoreUsers) setPage(prevPage => prevPage + 1);
+    if (!allLoaded) {
+      setPage(prevPage => prevPage + 1);
+    }
+    else loopUsers()
   };
 
-  if (loading && page === 1) return <Loader size="large" color={Constants.blue} />;
+  const handleSearch = () => {
+    const filteredData = users.filter(user =>
+      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    setFilteredUsers(filteredData);
+  };
+
+  if (loading && page === 1) return <Loader size="large" color="#FFBB1A" />
 
   return (
     <View style={{ paddingBottom: 100 }}>
@@ -65,29 +75,25 @@ const HomeScreen = ({ navigation }) => {
         <TextInput
           style={styles.searchInput}
           placeholder="Search by Name or Email..."
-          placeholderTextColor="gray"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
       </View>
 
-      {error && <Text style={styles.errorText}>{error}</Text>}
+      {error && <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>}
 
       {filteredUsers.length === 0 && searchQuery ? (
-        <Text style={styles.noResultsText}>No Results Found</Text>
+        <Text style={styles.noResultsText}>No ResultsFound</Text>
       ) : (
         <FlatList
           data={filteredUsers.length > 0 ? filteredUsers : users}
-          renderItem={({ item }) => <UserCard
-            user={item}
-            navigation={navigation}
-            clearSearch={clearSearchQuery}
-          />
-          }
+          renderItem={({ item }) => (
+            <UserCard user={item} navigation={navigation} />
+          )}
           keyExtractor={item => item.id.toString()}
           onEndReached={loadMoreUsers}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={loading && <Loader size="large" color={Constants.blue} />}
+          ListFooterComponent={loading && !allLoaded && <Loader size="large" color={Constants.blue} />}
         />
       )}
     </View>
@@ -103,6 +109,7 @@ const styles = StyleSheet.create({
     borderRadius: 15,
     paddingHorizontal: 20,
     margin: 10,
+    marginHorizontal: 20,
     backgroundColor: Constants.white,
   },
   searchIcon: {
@@ -110,17 +117,23 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 50,
-    color: Constants.black
-  },
-  errorText: {
-    color: 'red',
-    textAlign: 'center',
   },
   noResultsText: {
     textAlign: 'center',
     marginTop: 20,
     color: 'gray',
     fontSize: 16,
+  },
+  loadAllButton: {
+    backgroundColor: '#FFBB1A',
+    padding: 15,
+    margin: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  loadAllText: {
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
 

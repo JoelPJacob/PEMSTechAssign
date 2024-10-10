@@ -11,7 +11,7 @@ const UserPostsScreen = ({ route }) => {
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [error, setError] = useState('');
-  const [hasMorePosts, setHasMorePosts] = useState(true); 
+  const [allLoaded, setAllLoaded] = useState(false);
 
   useEffect(() => {
     fetchPosts();
@@ -22,9 +22,9 @@ const UserPostsScreen = ({ route }) => {
       setLoading(true);
       const postData = await getUserPosts(user.id);
       const newPosts = postData.slice((page - 1) * 5, page * 5);
-      
+
       if (newPosts.length < 5) {
-        setHasMorePosts(false); 
+        setAllLoaded(true);
       }
 
       setPosts(prevPosts => [...prevPosts, ...newPosts]);
@@ -35,10 +35,30 @@ const UserPostsScreen = ({ route }) => {
     }
   };
 
+  const loopPosts = async () => {
+    try {
+      setLoading(true);
+      const postData = await getUserPosts(user.id);
+      const newPosts = postData.slice((page - 3) * 5, page * 5);
+      if (newPosts.length < 5) {
+        setAllLoaded(true);
+      }
+      setPosts(prevPosts => [...prevPosts, ...newPosts]);
+      setError('');
+    } catch (error) {
+      setError(error.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const loadMorePosts = () => {
-    if (hasMorePosts) {
+    if (!allLoaded) {
       setPage(prevPage => prevPage + 1);
     }
+    else loopPosts()
+
+    
   };
 
   if (loading && page === 1) return <Loader size="large" color={Constants.blue} />
@@ -72,7 +92,7 @@ const UserPostsScreen = ({ route }) => {
           keyExtractor={item => item.id.toString()}
           onEndReached={loadMorePosts}
           onEndReachedThreshold={0.5}
-          ListFooterComponent={loading && <Loader size="large" color={Constants.blue} />}
+          ListFooterComponent={loading && !allLoaded && <Loader size="large" color={Constants.blue} />}
         />
       </View>
     </View>
