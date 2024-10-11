@@ -3,11 +3,19 @@ import axios from 'axios';
 const BASE_URL = 'https://jsonplaceholder.typicode.com';
 
 const handleError = (error) => {
-
-  if (error.response.status === 500) {
-    return 'Internal Server Error: Something went wrong on the server.';
+  if (error.response) {
+    // Check if the response exists and has a status
+    if (error.response.status === 500) {
+      return 'Internal Server Error: Something went wrong on the server.';
+    }
+    return `Error: ${error.response.statusText}`;
+  } else if (error.request) {
+    // The request was made but no response was received
+    return 'No response received: Please check your network connection.';
+  } else {
+    // Something else triggered the error
+    return `Error: ${error.message}`;
   }
-  return 'An error occurred. Please try again later.';
 };
 
 export const getUsers = async () => {
