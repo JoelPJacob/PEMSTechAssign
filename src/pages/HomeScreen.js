@@ -18,9 +18,9 @@ const HomeScreen = ({ navigation }) => {
     fetchUsers();
   }, [page]);
 
-  useEffect(() => {
-    handleSearch();
-  }, [searchQuery, users]);
+  // useEffect(() => {
+  //   handleSearch();
+  // }, [searchQuery, users]);
 
   const loopUsers = async () => {
     try {
@@ -58,27 +58,28 @@ const HomeScreen = ({ navigation }) => {
     else loopUsers()
   };
 
-  const handleSearch = () => {
-    const filteredData = users.filter(user =>
-      user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      user.email.toLowerCase().includes(searchQuery.toLowerCase())
-    );
-    setFilteredUsers(filteredData);
-  };
+  // const handleSearch = () => {
+  //   const filteredData = users.filter(user =>
+  //     user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  //     user.email.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+  //   setFilteredUsers(filteredData);
+  // };
 
   if (loading && page === 1) return <Loader size="large" color="#FFBB1A" />
 
   return (
-    <View style={{ paddingBottom: 100 }}>
-      <View style={styles.searchContainer}>
+    <View style={{ paddingBottom: 20 }}>
+      {/* <View style={styles.searchContainer}>
         <Search width={20} height={20} style={styles.searchIcon} />
         <TextInput
           style={styles.searchInput}
           placeholder="Search by Name or Email..."
           value={searchQuery}
           onChangeText={setSearchQuery}
+          placeholderTextColor={"grey"}
         />
-      </View>
+      </View> */}
 
       {error && <Text style={{ color: 'red', textAlign: 'center' }}>{error}</Text>}
 
@@ -117,12 +118,14 @@ const styles = StyleSheet.create({
   },
   searchInput: {
     height: 50,
+    color:Constants.black,
+    fontSize: 16,
   },
   noResultsText: {
     textAlign: 'center',
     marginTop: 20,
     color: 'gray',
-    fontSize: 16,
+    fontSize: 14,
   },
   loadAllButton: {
     backgroundColor: '#FFBB1A',
